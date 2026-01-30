@@ -1,0 +1,6 @@
+language: "de"
+
+# MOTD Settings (MiniMessage)
+motd:
+  line1: "<gradient:gold:yellow>bPlugins Server</gradient>"
+  line2: "<gray>Das ist ein Test-MOTD"

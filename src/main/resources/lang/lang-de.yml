@@ -1,0 +1,4 @@
+messages:
+  reload: "<green>System wurde neu geladen!"
+  no_permission: "<red>Bruder, du hast keine Rechte dafür."
+  prefix: "<dark_gray>[<blue>BMOTD</blue>] </dark_gray>"
