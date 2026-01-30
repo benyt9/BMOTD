@@ -1,6 +1,7 @@
 package b.bplugins.bmotd;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
@@ -19,40 +20,50 @@ public class Main extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();
         loadLanguage();
-
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("bmotd").setExecutor(new ReloadCommand(this));
-
-        getLogger().info("bMOTD aktiv!");
     }
 
     public void loadLanguage() {
-        reloadConfig(); // Lädt die config.yml neu (für MOTD & Lang-Wahl)
-
+        reloadConfig();
         String langMode = getConfig().getString("language", "de");
         File langFile = new File(getDataFolder(), "lang/lang-" + langMode + ".yml");
-
-        if (!langFile.exists()) {
-            // Speichert die Datei aus den Resources, falls sie auf dem Server fehlt
-            saveResource("lang/lang-de.yml", false);
-        }
+        if (!langFile.exists()) saveResource("lang/lang-de.yml", false);
         langConfig = YamlConfiguration.loadConfiguration(langFile);
     }
 
     @EventHandler
     public void onServerPing(ServerListPingEvent event) {
-        // Zieht die MOTD direkt aus der config.yml (nicht aus der lang!)
-        String line1 = getConfig().getString("motd.line1", "<red>Line 1 fehlt");
-        String line2 = getConfig().getString("motd.line2", "<red>Line 2 fehlt");
+        String line1 = getConfig().getString("motd.line1", "");
+        String line2 = getConfig().getString("motd.line2", "");
+
+        if (getConfig().getBoolean("always-middle", false)) {
+            line1 = centerText(line1);
+            line2 = centerText(line2);
+        }
 
         event.motd(mm.deserialize(line1 + "\n" + line2));
     }
 
-    public FileConfiguration getLangConfig() {
-        return langConfig;
+    // Die Magie: Text zentrieren
+    private String centerText(String text) {
+        // Wir strippen die MiniMessage Tags weg, um die echte Textlänge zu messen
+        String plainText = PlainTextComponentSerializer.plainText().serialize(mm.deserialize(text));
+
+        // Ein Standard-MOTD hat ca. 127 Pixel Platz pro Zeile (grob geschätzt für Leerzeichen)
+        // Minecraft nutzt ca. 6 Pixel pro Buchstabe, ein Leerzeichen hat ca. 4 Pixel.
+        int messagePx = 0;
+        for (char c : plainText.toCharArray()) {
+            // Sehr vereinfachte Pixel-Rechnung
+            messagePx += (c == 'i' || c == 'l' || c == '!' || c == '.') ? 2 : 6;
+        }
+
+        int halfDefault = 127; // Mitte der MOTD
+        int padding = (halfDefault - (messagePx / 2)) / 4; // Wie viele Leerzeichen brauchen wir?
+
+        return " ".repeat(Math.max(0, padding)) + text;
     }
 
-    public MiniMessage getMiniMessage() {
-        return mm;
-    }
+    public FileConfiguration getLangConfig() { return langConfig; }
+    public MiniMessage getMiniMessage() { return mm; }
 }
