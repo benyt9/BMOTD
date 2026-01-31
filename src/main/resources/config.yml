@@ -1,8 +1,12 @@
+# BMOTD Configuration
 language: "de"
+always-middle: true
 
-always-middle: false
-
-# MOTD Settings (MiniMessage)
-motd:
-  line1: "<gradient:gold:yellow>bPlugins Server</gradient>"
-  line2: "<gray>Das ist ein Test-MOTD"
+# MOTDs
+motds:
+  - line1: "<gradient:aqua:blue><b>EinfachBen</b></gradient>"
+    line2: "<gray>Das ist ein Test"
+  - line1: "<red>🔥 PvP EVENT 🔥"
+    line2: "<yellow>Join jetzt auf dem Server!"
+  - line1: "<rainbow>BMOTD Plugin</rainbow>"
+    line2: "<green>Jetzt mit Random-Rotation!"

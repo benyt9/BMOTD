@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'b.bplugins.bmotd'
-version = '1.0-BETA'
+version = '1.2-BETA'
 
 repositories {
     mavenCentral()
