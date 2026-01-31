@@ -1,5 +1,7 @@
 language: "de"
 
+always-middle: false
+
 # MOTD Settings (MiniMessage)
 motd:
   line1: "<gradient:gold:yellow>bPlugins Server</gradient>"

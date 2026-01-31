@@ -37,6 +37,12 @@ public class Main extends JavaPlugin implements Listener {
         String line1 = getConfig().getString("motd.line1", "");
         String line2 = getConfig().getString("motd.line2", "");
 
+        // 1. PlaceholderAPI Unterstützung hinzufügen
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            line1 = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(null, line1);
+            line2 = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(null, line2);
+        }
+
         if (getConfig().getBoolean("always-middle", false)) {
             line1 = centerText(line1);
             line2 = centerText(line2);
@@ -47,23 +53,44 @@ public class Main extends JavaPlugin implements Listener {
 
     // Die Magie: Text zentrieren
     private String centerText(String text) {
-        // Wir strippen die MiniMessage Tags weg, um die echte Textlänge zu messen
+        if (text == null || text.isEmpty()) return "";
+
+        // Tags entfernen für die Messung
         String plainText = PlainTextComponentSerializer.plainText().serialize(mm.deserialize(text));
 
-        // Ein Standard-MOTD hat ca. 127 Pixel Platz pro Zeile (grob geschätzt für Leerzeichen)
-        // Minecraft nutzt ca. 6 Pixel pro Buchstabe, ein Leerzeichen hat ca. 4 Pixel.
-        int messagePx = 0;
+        double messagePx = 0;
         for (char c : plainText.toCharArray()) {
-            // Sehr vereinfachte Pixel-Rechnung
-            messagePx += (c == 'i' || c == 'l' || c == '!' || c == '.') ? 2 : 6;
+            messagePx += getCharWidth(c);
         }
 
-        int halfDefault = 127; // Mitte der MOTD
-        int padding = (halfDefault - (messagePx / 2)) / 4; // Wie viele Leerzeichen brauchen wir?
+        // Ein MOTD hat eine Breite von ca. 280-300 Pixeln in der Anzeige.
+        // Die Mitte liegt bei etwa 140-150 Pixeln.
+        double centerPoint = 150;
+        double halfMessage = messagePx / 2;
+        double paddingPx = centerPoint - halfMessage;
 
-        return " ".repeat(Math.max(0, padding)) + text;
+        // Ein Leerzeichen ist ca. 4 Pixel breit
+        int spaceCount = (int) (paddingPx / 4);
+
+        return " ".repeat(Math.max(0, spaceCount)) + text;
     }
 
-    public FileConfiguration getLangConfig() { return langConfig; }
-    public MiniMessage getMiniMessage() { return mm; }
+    private double getCharWidth(char c) {
+        // Pixel-Breiten für Minecraft Default Font
+        if (c == 'i' || c == '!' || c == '|' || c == ':') return 2;
+        if (c == 'l' || c == '.' || c == ',') return 3;
+        if (c == 't' || c == 'I' || c == '[' || c == ']') return 4;
+        if (c == 'f' || c == 'k' || c == '(' || c == ')' || c == ' ') return 5;
+        if (c == '<' || c == '>') return 4;
+
+        // Die meisten anderen Buchstaben (A-Z, 0-9) sind 6 Pixel breit
+        return 6;
+    }
+    public FileConfiguration getLangConfig() {
+        return langConfig;
+    }
+
+    public MiniMessage getMiniMessage() {
+        return mm;
+    }
 }
